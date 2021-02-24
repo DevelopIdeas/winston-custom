@@ -1,0 +1,23 @@
+{
+  "name": "winston-custom",
+  "version": "1.0.0",
+  "description": "My Preferred winston setup for both console and file setup, file logs are used with Logstash + ELK",
+  "main": "src/logger.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevelopIdeas/winston-custom.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DevelopIdeas/winston-custom/issues"
+  },
+  "homepage": "https://github.com/DevelopIdeas/winston-custom#readme",
+  "dependencies": {
+    "express-http-context": "^1.2.4",
+    "winston": "^3.3.3"
+  }
+}
