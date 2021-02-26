@@ -1,6 +1,9 @@
 const { createLogger, format, transports } = require('winston');
 const { appRoot, customConsole, customJson, customExtra } = require('./winston-formatter');
 
+const LOG_FILEDIR = process.env.LOG_FILEDIR || `${appRoot}/logs/`;
+const LOG_FILENAME = process.env.LOG_FILENAME || 'app.log';
+
 const logger = new createLogger({
   format: format.combine(
     format.timestamp({}),
@@ -9,7 +12,7 @@ const logger = new createLogger({
   transports: [
     new transports.File({
       level: 'debug',
-      filename: `${appRoot}/logs/app.log`,
+      filename: `${LOG_FILEDIR}${LOG_FILENAME}`,
       handleExceptions: true,
       maxsize: 104857600, // 100MB
       maxFiles: 1,

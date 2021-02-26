@@ -6,6 +6,8 @@ const { appRoot, getProcessName } = require('./process-utils');
 const { pid } = process;
 const processName = getProcessName();
 
+const LOG_CONSOLE_CONTEXT = process.env.LOG_CONSOLE_CONTEXT || 0;
+
 const customExtra = format((info, opts) => {
   const context = httpContext.get('context') || null;
   const request_id = httpContext.get('request_id');
@@ -36,21 +38,23 @@ const customConsole = format.printf(({ level, message, timestamp, context, proce
   const splat = metadata[Symbol.for('splat')];
   let meta = null;
   if (splat && splat.length > 0) {
-    meta = splat[0];
+    meta = splat[0] || null;
   }
   if (typeof message === 'object') {
     // message = JSON.stringify(message);
     message = util.inspect(message, false, null, true);
   }
   if (typeof meta === 'object') {
-    // meta = JSON.stringify(meta);
     meta = util.inspect(meta, false, null, true);
   }
-  if (typeof context === 'object') {
-    // context = JSON.stringify(context);
-    context = util.inspect(context, false, null, true);
+  let contextStr = '';
+  if (LOG_CONSOLE_CONTEXT === 1) {
+    if (typeof context === 'object') {
+      context = util.inspect(context, false, null, true);
+    }
+    contextStr = ` context: ${context}`;
   }
-  const out = `${timestamp} ${process ? `[${process}] ` : ''}${level}: ${message} meta: ${meta} context: ${context}`;
+  const out = `${timestamp} ${process ? `[${process}] ` : ''}${level}: ${message} meta: ${meta}${contextStr}`;
   return out;
 })
 
