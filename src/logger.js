@@ -1,18 +1,32 @@
-const { createLogger, format, transports } = require('winston');
+const { createLogger: createLoggerOrig, format, transports } = require('winston');
 const { appRoot, customConsole, customJson, customExtra } = require('./winston-formatter');
-
 const LOG_FILEDIR = process.env.LOG_FILEDIR || `${appRoot}/logs/`;
 const LOG_FILENAME = process.env.LOG_FILENAME || 'app.log';
 
-const logger = new createLogger({
-  format: format.combine(
-    format.timestamp({}),
-    format.errors({ stack: true })
-  ),
-  transports: [
-    new transports.File({
-      level: 'debug',
-      filename: `${LOG_FILEDIR}${LOG_FILENAME}`,
+const createLogger = (opts) => {
+  let { defaultMeta, process, filePath, consoleLevel, fileLevel } = opts||{};
+  defaultMeta = defaultMeta || {};
+  if (process) {
+    defaultMeta.__logger_process = process;
+  }
+  let transportArr = [];
+  if (consoleLevel !== false) {
+    transportArr.push(new transports.Console({
+      level: consoleLevel || 'debug',
+      handleExceptions: true,
+      format: format.combine(
+        format.colorize(),
+        format.splat(),
+        format.prettyPrint(),
+        customExtra(),
+        customConsole
+      )
+    }));
+  }
+  if (fileLevel !== false) {
+    transportArr.push(new transports.File({
+      level: fileLevel || 'debug',
+      filename: filePath || `${LOG_FILEDIR}${LOG_FILENAME}`,
       handleExceptions: true,
       maxsize: 104857600, // 100MB
       maxFiles: 1,
@@ -23,20 +37,18 @@ const logger = new createLogger({
         customExtra(),
         format.json()
       )
-    }),
-    new transports.Console({
-      level: 'debug',
-      handleExceptions: true,
-      format: format.combine(
-        format.colorize(),
-        format.splat(),
-        format.prettyPrint(),
-        customExtra(),
-        customConsole
-      )
-    })
-  ],
-  exitOnError: false, // do not exit on handled exceptions
-});
+    }));
+  }
+  const logger = new createLoggerOrig({
+    format: format.combine(
+      format.timestamp({}),
+      format.errors({ stack: true })
+    ),
+    defaultMeta,
+    transports: transportArr,
+    exitOnError: false, // do not exit on handled exceptions
+  });
+  return logger;
+};
 
-module.exports = logger;
+module.exports = { createLogger, appRoot };

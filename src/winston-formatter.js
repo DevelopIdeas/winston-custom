@@ -11,7 +11,12 @@ const LOG_CONSOLE_CONTEXT = process.env.LOG_CONSOLE_CONTEXT || 0;
 const customExtra = format((info, opts) => {
   const context = httpContext.get('context') || null;
   const request_id = httpContext.get('request_id');
-  return { ...info, context: context, process: processName, request_id: request_id ? request_id : undefined, pid }
+  let process = processName;
+  if (info.meta && info.meta.__logger_process) {
+    process = info.meta.__logger_process;
+    delete info.meta.__logger_process;
+  }
+  return { ...info, context: context, process, request_id: request_id ? request_id : undefined, pid }
 });
 
 const customJson = format((info, opts) => {
@@ -31,6 +36,7 @@ const customJson = format((info, opts) => {
   }
   info.meta = info.metadata;
   delete info.metadata;
+  delete info.__logger_process;
   return info;
 });
 
