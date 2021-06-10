@@ -1,8 +1,32 @@
 const { createLogger: createLoggerOrig, format, transports } = require('winston');
 const httpContext = require('express-http-context');
+const { v4 } = require('uuid');
 const { appRoot, customConsole, customJson, customExtra } = require('./winston-formatter');
 const LOG_FILEDIR = process.env.LOG_FILEDIR || `${appRoot}/logs/`;
 const LOG_FILENAME = process.env.LOG_FILENAME || 'app.log';
+
+const httpContextMiddleware = (logger) => (req, res, next) => {
+  const context = {
+    req_id: v4()
+  };
+  if (req.path) {
+    context.req_path = req.path;
+  }
+  let host = req.headers && req.headers.host ? req.headers.host : null;
+  let user_id = res.locals && res.locals.user ? res.locals.user.user_id : null;
+  let email = res.locals && res.locals.user ? res.locals.user.email : null;
+  if (host) {
+    context.req_host = host;
+  }
+  if (user_id) {
+    context.user_id = user_id;x
+  }
+  if (email) {
+    context.email = email;
+  }
+  logger.setContext(context);
+  next();
+}
 
 const setContext = (updates) => {
   let context = httpContext.get('context');
@@ -61,4 +85,4 @@ const createLogger = (opts) => {
   return logger;
 };
 
-module.exports = { createLogger, setContext, appRoot };
+module.exports = { createLogger, setContext, httpContextMiddleware, appRoot };
