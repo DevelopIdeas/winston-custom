@@ -57,6 +57,7 @@ const createLogger = (opts) => {
     transports: transportArr,
     exitOnError: false, // do not exit on handled exceptions
   });
+  logger.setContext = setContext;
   return logger;
 };
 
