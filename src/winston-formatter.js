@@ -6,7 +6,8 @@ const { appRoot, getProcessName } = require('./process-utils');
 const { pid } = process;
 const processName = getProcessName();
 
-const LOG_CONSOLE_CONTEXT = process.env.LOG_CONSOLE_CONTEXT || 0;
+let LOG_CONSOLE_CONTEXT = parseInt(process.env.LOG_CONSOLE_CONTEXT);
+LOG_CONSOLE_CONTEXT = isNaN(LOG_CONSOLE_CONTEXT) ? 0 : LOG_CONSOLE_CONTEXT;
 
 const customExtra = format((info, opts) => {
   const context = httpContext.get('context') || null;
