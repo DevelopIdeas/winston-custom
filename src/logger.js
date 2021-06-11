@@ -19,7 +19,7 @@ const httpContextMiddleware = (logger) => (req, res, next) => {
     context.req_host = host;
   }
   if (user_id) {
-    context.user_id = user_id;x
+    context.user_id = user_id;
   }
   if (email) {
     context.email = email;
