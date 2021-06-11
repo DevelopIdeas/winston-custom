@@ -9,8 +9,8 @@ const httpContextMiddleware = (logger) => (req, res, next) => {
   const context = {
     req_id: v4()
   };
-  if (req.path) {
-    context.req_path = req.path;
+  if (req.originalUrl) {
+    context.req_path = req.originalUrl;
   }
   let host = req.headers && req.headers.host ? req.headers.host : null;
   let user_id = res.locals && res.locals.user ? res.locals.user.user_id : null;
