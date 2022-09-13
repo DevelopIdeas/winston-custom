@@ -17,7 +17,11 @@ const customExtra = format((info, opts) => {
     process = info.meta.__logger_process;
     delete info.meta.__logger_process;
   }
-  return { ...info, context: context, process, request_id: request_id ? request_id : undefined, pid }
+  const ret = { ...info, context: context, process, pid }
+  if (request_id) {
+    ret.request_id = request_id
+  }
+  return ret
 });
 
 const customJson = format((info, opts) => {
@@ -42,16 +46,25 @@ const customJson = format((info, opts) => {
 });
 
 const customConsole = format.printf(({ level, message, timestamp, context, process, ...metadata }) => {
-  const splat = metadata[Symbol.for('splat')];
-  let meta = null;
-  if (splat && splat.length > 0) {
-    meta = splat[0] || null;
+  const metaKeys = Object.keys(metadata);
+  let meta = metaKeys.length > 0 ? {} :  null;
+  for (let key of metaKeys) {
+    meta[key] = metadata[key]
   }
+  // let meta = null;
+  // const splat = metadata[Symbol.for('splat')];
+  // if (splat && splat.length > 0) {
+  //   meta = splat[0] || null;
+  // }
   if (typeof message === 'object') {
-    // message = JSON.stringify(message);
     message = util.inspect(message, false, null, true);
   }
+  let __namespace = null
   if (typeof meta === 'object') {
+    if (meta.__namespace) {
+      __namespace = meta.__namespace
+      delete meta.__namespace
+    }
     meta = util.inspect(meta, false, null, true);
   }
   let contextStr = '';
@@ -61,7 +74,7 @@ const customConsole = format.printf(({ level, message, timestamp, context, proce
     }
     contextStr = ` context: ${context}`;
   }
-  const out = `${timestamp} ${process ? `[${process}] ` : ''}${level}: ${message} meta: ${meta}${contextStr}`;
+  const out = `${timestamp} ${process ? `[${process}]${__namespace ? `[${__namespace}]` : ''} ` : ''}${level}: ${message} meta: ${meta}${contextStr}`;
   return out;
 })
 
