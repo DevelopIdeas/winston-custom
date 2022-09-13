@@ -82,6 +82,9 @@ const createLogger = (opts) => {
     exitOnError: false, // do not exit on handled exceptions
   });
   logger.setContext = setContext;
+  logger.getNamespace = (ns, extras) => {
+    return logger.child({ __namespace: ns, ...(extras||{}) })
+  }
   return logger;
 };
 
